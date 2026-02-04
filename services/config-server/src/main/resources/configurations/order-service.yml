@@ -1,0 +1,29 @@
+server:
+  port: 8765
+
+spring:
+  application:
+    name: order-service
+  datasource:
+    url: jdbc:postgresql://localhost:5433/orders #create an orders database
+    username: postgres
+    password: password
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: create
+    database: postgresql
+    database-postgres: org.hibernate.dialect.PostgreSQLDialect
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+
+application:
+  conifg:
+    customer-url: http://localhost:8090/api/v1/customers
+    #we are initially using the port of the service directly but in phase 2
+    #we are going to move to connecting via an api gateway(this is essential at the time of scaling)
+    #because there maybe multiple instances running of a service, so we need to think about that too
+    product-url: http://localhost:8111/api/v1/product
+    payment-url: http://localhost:8060/api/v1/payments

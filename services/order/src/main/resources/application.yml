@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: order-service
+  conifg:
+    import: optional:configserver:http://localhost:8888

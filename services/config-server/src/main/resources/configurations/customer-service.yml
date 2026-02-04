@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: customer-service
+  server:
+    port: 8090
+  data:
+    mongodb:
+      username: megha
+      password: password
+      host: localhost
+      port: 27017
+      database: customer
+      authentication-database: admin

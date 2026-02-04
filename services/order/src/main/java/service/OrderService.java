@@ -1,0 +1,47 @@
+package service;
+
+import customer.CustomerClient;
+import entities.Order;
+import entities.OrderLine;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import product.ProductClient;
+import repository.OrderRepository;
+import utils.OrderLineRequest;
+import utils.OrderMapper;
+import utils.OrderRequest;
+import utils.PurchaseRequest;
+
+@Service
+@RequiredArgsConstructor
+public class OrderService {
+    private final CustomerClient customerClient;
+    private final ProductClient productClient;
+    private final OrderRepository orderRepo;
+    private final OrderMapper mapper;
+    private final OrderLineService orderLineService;
+
+    public Order createdOrder(OrderRequest request){
+        //check if the customer is valid --> OpenFeign
+        var customer = customerClient.findCustomerById(request.customerId()).orElseThrow(() -> new RuntimeException("Cannot create order as customer is not valid!"));
+        //purchase the product -> product-microservice
+        var purchases = productClient.purchaseProducts(request.productsPurchased());
+        //persist order
+        Order savedOrder = orderRepo.save(mapper.toOrder(request));
+        //persist order lines
+        for(PurchaseRequest productRequest : request.productsPurchased()){
+            orderLineService.saveOrderLine(
+                    new OrderLineRequest(
+                            null,
+                            savedOrder.getOrderId(),
+                            productRequest.productId(),
+                            productRequest.quantity()
+                    )
+            );
+        }
+        //todo: start payment process(kafka)
+
+        //send the order confirmation --> notification-microservice(kafka)
+        return null;
+    }
+}
