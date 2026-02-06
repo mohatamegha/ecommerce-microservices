@@ -1,7 +1,7 @@
 package utils;
 
 public record PurchaseResponse(
-     Integer prodcutId,
+     Integer productId,
      String name,
      String description,
      double price,
