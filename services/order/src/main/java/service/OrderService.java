@@ -6,6 +6,8 @@ import kafka.OrderConfirmation;
 import kafka.OrderProducer;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import payment.PaymentClient;
+import payment.PaymentRequest;
 import product.ProductClient;
 import repository.OrderRepository;
 import utils.OrderLineRequest;
@@ -24,6 +26,7 @@ public class OrderService {
     private final OrderMapper mapper;
     private final OrderLineService orderLineService;
     private final OrderProducer orderProducer;
+    private final PaymentClient paymentClient;
 
     public Order createOrder(OrderRequest request){
         //check if the customer is valid --> OpenFeign
@@ -43,7 +46,16 @@ public class OrderService {
                     )
             );
         }
-        //todo: start payment process(kafka)
+        //start payment process(kafka)
+        PaymentRequest paymentRequest = new PaymentRequest(
+                request.amount(),
+                request.paymentMethod(),
+                request.orderId(),
+                request.reference(),
+                customer
+        );
+        
+        paymentClient.requestOrderPayment(paymentRequest);
 
         //send the order confirmation --> notification-microservice(kafka)
         orderProducer.sendOrderConfirmation(
